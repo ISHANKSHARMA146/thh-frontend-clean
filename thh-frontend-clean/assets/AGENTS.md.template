@@ -1,0 +1,31 @@
+# AGENTS.md — THH Frontend
+
+The deep conventions live in the `thh-frontend-clean` skill (it loads on demand). This file is the **always-on, lean** layer: only what can't be inferred. Rename to `AGENTS.md` at repo root, then `ln -s AGENTS.md CLAUDE.md` so every tool reads one source. Keep it under ~120 lines — if a rule can be enforced by ESLint/Prettier/tsc, it belongs there, not here.
+
+## Commands
+- Dev: `pnpm dev` (Turbopack: `pnpm dev:turbo`)
+- Typecheck: `pnpm typecheck` · Lint+fix: `pnpm lint --fix` · Test: `pnpm test` · Build: `pnpm build`
+- **Done = typecheck + lint + relevant tests pass.** Don't claim done otherwise.
+
+## Where state lives (prevents most duplication)
+Server data → **TanStack Query**. Global client/UI → **Zustand**. Local → `useState`. Shareable view state (filters/tab/page/sort) → **URL params**. Never copy server data into Zustand or `useState`.
+
+## Version traps (your training likely gets these wrong)
+- **Next 15:** `params`/`searchParams`/`cookies()`/`headers()` are **async — await them**. `fetch` & GET handlers are **not cached by default**. Mutations = Server Actions + `revalidatePath`/`revalidateTag`. Server Components by default; `"use client"` only on interactive leaves.
+- **React 19:** `ref` is a prop — **no `forwardRef`**. Forms: `useActionState`/`useFormStatus`/`useOptimistic`. If the React Compiler is on, **no manual `useMemo`/`useCallback`/`memo`**.
+- **Tailwind v4:** **no `tailwind.config.js`** — tokens in `@theme` (CSS). `@import "tailwindcss"`. Merge with `cn()`, vary with `cva`. Default scale renamed (`shadow`→`shadow-sm`).
+- **TanStack Query v5:** single options object; keys from the factory. `cacheTime`→`gcTime`, `keepPreviousData`→`placeholderData: keepPreviousData`, `useErrorBoundary`→`throwOnError`.
+- **Zustand v5:** multi-value selectors need `useShallow`; export hooks, never the raw store.
+
+## Patterns — copy the nearest example
+Data hook → feature `queries.ts` + key factory + `queryOptions`. Mutation → optimistic `onMutate` / rollback `onError` / invalidate `onSettled`. Store → `createXSlice` in the one bound store. Form → one Zod schema, `z.infer` for the type, RHF + `zodResolver`, reused server-side. UI → extend shadcn primitives in `components/ui`, compose don't fork.
+
+## Structure
+`app/` → `components/` → `lib/`, one direction. `lib/` imports nothing from `components/`/`app/`. `hooks/` and `stores/` are client-only. Named exports only (except Next's required default exports).
+
+## Domain glossary
+job, candidate, panelist, interview, pipeline (kanban stages), credits, usage, reports, tour.
+<!-- Add internal acronyms/entity names — highest-leverage thing to maintain here. -->
+
+## Deeper guidance
+Use the `thh-frontend-clean` skill for any non-trivial frontend work — it carries the full per-library detail so this file stays short.
