@@ -22,6 +22,21 @@ How the repo is organized so both humans and AI agents can find things instantly
 - **Compound components** for repeated structures (e.g. `<Card>`, `<Card.Header>`, `<Card.Body>`) when several pieces always travel together.
 - **Server components for the static shell, small client islands for interaction** — don't make a whole page a client component to get one button working.
 
+## File size & splitting (god-file rule)
+
+Oversized files are the repo's most common structural defect (real examples exceed 3,000 lines). Big files hide duplication, defeat code review, and make agents reload huge context to change one line. Audit against these soft caps — a file over the cap is a finding, not automatically a rewrite:
+
+- **Component `.tsx` > ~300 lines** → extract sub-components, move handlers to a hook, split sub-views. A screen with five sections is five components plus a thin container.
+- **Service `*-service.ts` > ~400 lines** → split by sub-resource into a folder (see `references/data-layer.md`, D3).
+- **Store > ~300 lines** → split into slices (see `references/state.md`).
+- **Hook > ~150 lines** → it's probably doing two things; split by concern.
+
+How to split without churn:
+- Extract the largest self-contained JSX block into a named child component first; repeat.
+- Lift event handlers and derived state into a colocated `use<Feature>` hook so the component body is mostly markup.
+- Keep extracted pieces colocated (same feature folder), not flung into a global dir.
+- Split incrementally — never rewrite a working 2k-line file in one pass. Each extraction must keep behavior identical and typecheck.
+
 ## Techniques for fewer lines (DRY, applied to this stack)
 - One **Zod schema** → type via `z.infer`, reused on client and server. (Don't write a parallel TS interface.)
 - One **query-key factory** per feature; one **`queryOptions`** definition reused by query/prefetch/suspense.

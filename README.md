@@ -1,46 +1,68 @@
 # thh-frontend-clean
 
-A Claude Code / Cursor / Cowork **skill** that enforces clean, fast, DRY, AI-friendly frontend code for the THH stack: **Next.js 15** (App Router), **React 19**, **TypeScript**, **Tailwind v4**, **TanStack Query v5**, **Zustand v5**, **react-hook-form + Zod**, **shadcn/ui**, **Radix**.
+Two paired Claude Code **skills** that keep the THH frontend clean, fast, DRY, and easy for humans and AI agents to navigate. Stack: **Next.js 15** (App Router), **React 19**, **TypeScript**, **Tailwind v4**, **TanStack Query v5**, **Zustand v5**, **react-hook-form + Zod**, **shadcn/ui + Radix**, plus the repo's real integrations — a thick `services/` layer, **next-auth**, **Sanity**, **TanStack Table/Virtual**, **socket.io**, **dnd-kit**, **recharts**, **posthog**.
 
-It triggers automatically on any frontend work — building a component/page/feature, adding a data hook, creating a form, wiring an API call, refactoring, cleaning up, or fixing re-renders — and encodes version-specific traps (async params in Next 15, ref-as-prop + React Compiler in React 19, CSS-first `@theme` in Tailwind v4, `useShallow` + slices in Zustand 5, query-key factories in TanStack Query 5).
+## Two modes
+
+| Command | Mode | What it does |
+|---|---|---|
+| **`/thh-fe-audit`** | read-only | Scans code, reports clean/fast/DRY/AI-friendly violations as a tiered report with `file:line` + suggested fix. **Changes nothing.** Use for review, PRs, scoping a cleanup. |
+| **`/thh-fe-code`** | apply | Applies the confirmed findings from an audit, or writes new code clean-by-construction. Edits/splits/refactors, then verifies with `pnpm typecheck` + `pnpm lint --fix`. |
+
+Audit is the cure-diagnosis; code is the fix + the prevention. They share one rulebook (`thh-fe-audit/references/` + `assets/`).
 
 ## What's inside
 
 ```
-thh-frontend-clean/
-├── SKILL.md                      # entry point (auto-loaded by the agent)
-├── references/                   # area-specific guides, loaded on demand
-│   ├── nextjs.md  react.md  state.md  forms.md
-│   ├── components-structure.md  styling.md  performance.md  tooling.md
-└── assets/                       # ready-to-use configs
-    ├── eslint.config.mjs  prettier.config.mjs  env.ts
-    ├── AGENTS.md.template  SETUP.md  lib/utils.ts
+thh-fe-audit/                     # /thh-fe-audit skill (read-only)
+├── SKILL.md                      # audit workflow + tiered report format
+├── references/                   # shared rulebook (loaded on demand)
+│   ├── data-layer.md             # services thick→thin, fetch, caching, prefetch
+│   ├── integrations.md           # next-auth, Sanity, Table/Virtual, socket, dnd, recharts, posthog, dup libs
+│   ├── components-structure.md   # structure, composition, god-file split rules
+│   ├── state.md  nextjs.md  react.md  styling.md  forms.md
+│   ├── performance.md  tooling.md
+├── assets/                       # ready-to-use configs
+│   ├── eslint.config.mjs  prettier.config.mjs  env.ts
+│   ├── AGENTS.md.template  SETUP.md  lib/utils.ts
+└── thh-fe-code/
+    └── SKILL.md                  # /thh-fe-code skill (apply); reads the same references/
 ```
 
 ## Install (Claude Code)
 
-Clone into a repo's skills dir (repo-scoped) or your home skills dir (global):
+Both skills live in one repo. `thh-fe-code` is nested under `thh-fe-audit/` and surfaced as its own command via a symlink (same pattern as `thh-clean`/`thh-code`).
 
+**Global (every project on your machine):**
 ```bash
-# repo-scoped — every frontend task in that repo can use it
-git clone https://github.com/ISHANKSHARMA146/thh-frontend-clean.git \
-  .claude/skills/thh-frontend-clean-tmp
-mv .claude/skills/thh-frontend-clean-tmp/thh-frontend-clean .claude/skills/thh-frontend-clean
-rm -rf .claude/skills/thh-frontend-clean-tmp
+git clone https://github.com/ISHANKSHARMA146/thh-frontend-clean.git /tmp/tfc
+cp -R /tmp/tfc/thh-fe-audit ~/.claude/skills/thh-fe-audit
+ln -sfn ~/.claude/skills/thh-fe-audit/thh-fe-code ~/.claude/skills/thh-fe-code
+rm -rf /tmp/tfc
 ```
 
+**Repo-scoped (one project):**
 ```bash
-# OR global — available in every project on your machine
-git clone https://github.com/ISHANKSHARMA146/thh-frontend-clean.git /tmp/tfc \
-  && cp -R /tmp/tfc/thh-frontend-clean ~/.claude/skills/ && rm -rf /tmp/tfc
+git clone https://github.com/ISHANKSHARMA146/thh-frontend-clean.git /tmp/tfc
+cp -R /tmp/tfc/thh-fe-audit .claude/skills/thh-fe-audit
+ln -sfn "$PWD/.claude/skills/thh-fe-audit/thh-fe-code" .claude/skills/thh-fe-code
+rm -rf /tmp/tfc
 ```
 
-The agent picks it up automatically. Invoke explicitly with `/thh-frontend-clean`.
+Reload skills (`/reload-plugins` in Claude Code) — `/thh-fe-audit` and `/thh-fe-code` both appear.
+
+## Typical loop
+
+```
+/thh-fe-audit src/services/job-service.ts   →  tiered report, top-3 fixes
+# you confirm which to fix
+/thh-fe-code  apply the Tier-1 findings      →  edits + typecheck + lint
+```
 
 ## Repo tooling setup (one-time, per project)
 
-Follow `thh-frontend-clean/assets/SETUP.md` — it copies the eslint/prettier/env configs, drops the lean always-on `AGENTS.md` at the repo root, and wires a husky + lint-staged pre-commit hook so generated code is auto-fixed before it lands.
+Follow `thh-fe-audit/assets/SETUP.md` — copies the eslint/prettier/env configs, drops the lean always-on `AGENTS.md` at the repo root, and wires husky + lint-staged so generated code is auto-fixed before it lands.
 
 ## For the THH team
 
-Pull updates with `git pull`. Edit `SKILL.md` / `references/*` to evolve the rules; keep the prose lean — anything a linter or type checker can enforce belongs in `assets/`, not in the skill text.
+`git pull` to update. Edit `thh-fe-audit/references/*` to evolve the rules — both modes read the same files, so a rule added once applies to audit and apply. Keep the prose lean: anything a linter or type checker can enforce belongs in `assets/`, not the skill text.
