@@ -47,6 +47,7 @@ The standard: fewer lines, zero duplication, no dead weight, patterns consistent
 | File structure, composition, shadcn, god-files, reducing duplication | `references/components-structure.md` |
 | Bundle size, lazy loading, lists/tables, perceived speed | `references/performance.md` |
 | **next-auth, Sanity, TanStack Table/Virtual, socket.io, dnd-kit, recharts, posthog, duplicate libs** | `references/integrations.md` |
+| **AI slop, generic code, design tokens, reinvented primitives, following our patterns** | `references/anti-ai-slop.md` |
 | ESLint, Prettier, TypeScript, env validation, pre-commit | `references/tooling.md` |
 
 ## Golden rules (what you're auditing against)
@@ -59,6 +60,7 @@ The standard: fewer lines, zero duplication, no dead weight, patterns consistent
 6. **No god-files.** Component >~300 lines, service >~400, store >~300, hook >~150 → finding. (`references/components-structure.md`.)
 7. **Let the compiler do the work.** If the React Compiler is on, no hand-written `useMemo`/`useCallback`/`React.memo`. Type everything; `any` is a defect. Named exports (Next's default `page`/`layout`/`route` are the only exception).
 8. **Respect the version.** The traps below are what older training data gets wrong.
+9. **Follow the breadcrumbs — no AI slop.** Match THH's system design, design tokens (`--color-ink`/`--color-paper`/`--color-brand`, Fraunces serif), and existing `components/ui/` primitives. Flag reinvented primitives, hardcoded design values (`gray-*`/`white`/hex/Inter/purple), defensive try-catch bloat, `any`/casts, redundant comments, unstable keys, missing loading/empty/error states, and the generic-SaaS look. (`references/anti-ai-slop.md`. Deep enforcement: the `/thh-fe-antiai` skill.)
 
 ## Version cheat sheet (the traps)
 
@@ -84,6 +86,7 @@ The standard: fewer lines, zero duplication, no dead weight, patterns consistent
 - Duplicate-purpose deps (`framer-motion` vs `motion`, two editors, many select libs).
 - Heavy client-only libs (editors, charts, dnd, Calendly) imported eagerly → `next/dynamic`.
 - God-files over the size caps.
+- **AI slop:** reinvented `ui/` primitive (new select/modal/table/spinner), hardcoded design (`text-gray-`/`bg-white`/hex/`fontFamily`/`indigo`), `as any`/`@ts-ignore`, empty `catch`/leftover `console.log`, `key={index}`, missing loading/empty/error states, comment noise. (`references/anti-ai-slop.md`.)
 - Dead code, unused exports, commented-out blocks, unused deps.
 
 ## Report format

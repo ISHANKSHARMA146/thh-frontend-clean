@@ -8,8 +8,9 @@ Two paired Claude Code **skills** that keep the THH frontend clean, fast, DRY, a
 |---|---|---|
 | **`/thh-fe-audit`** | read-only | Scans code, reports clean/fast/DRY/AI-friendly violations as a tiered report with `file:line` + suggested fix. **Changes nothing.** Use for review, PRs, scoping a cleanup. |
 | **`/thh-fe-code`** | apply | Applies the confirmed findings from an audit, or writes new code clean-by-construction. Edits/splits/refactors, then verifies with `pnpm typecheck` + `pnpm lint --fix`. |
+| **`/thh-fe-antiai`** | anti-slop | Enforces THH's own design system, tokens, and existing primitives — kills generic AI slop (reinvented components, hardcoded `gray-*`/`white`/hex/Inter/purple, defensive bloat, `any`, missing states). Reviews or enforces-while-writing. |
 
-Audit is the cure-diagnosis; code is the fix + the prevention. They share one rulebook (`thh-fe-audit/references/` + `assets/`).
+Audit is the cure-diagnosis; code is the fix + the prevention; anti-slop keeps it looking like THH wrote it, not an LLM. All three share one rulebook (`thh-fe-audit/references/` + `assets/`).
 
 ## What's inside
 
@@ -19,14 +20,17 @@ thh-fe-audit/                     # /thh-fe-audit skill (read-only)
 ├── references/                   # shared rulebook (loaded on demand)
 │   ├── data-layer.md             # services thick→thin, fetch, caching, prefetch
 │   ├── integrations.md           # next-auth, Sanity, Table/Virtual, socket, dnd, recharts, posthog, dup libs
+│   ├── anti-ai-slop.md           # THH design system, slop catalog (bad→THH), breadcrumb checklist
 │   ├── components-structure.md   # structure, composition, god-file split rules
 │   ├── state.md  nextjs.md  react.md  styling.md  forms.md
 │   ├── performance.md  tooling.md
 ├── assets/                       # ready-to-use configs
 │   ├── eslint.config.mjs  prettier.config.mjs  env.ts
 │   ├── AGENTS.md.template  SETUP.md  lib/utils.ts
-└── thh-fe-code/
-    └── SKILL.md                  # /thh-fe-code skill (apply); reads the same references/
+├── thh-fe-code/
+│   └── SKILL.md                  # /thh-fe-code skill (apply); reads the same references/
+└── thh-fe-antiai/
+    └── SKILL.md                  # /thh-fe-antiai skill (anti-slop); reads the same references/
 ```
 
 ## Install (Claude Code)
@@ -37,7 +41,8 @@ Both skills live in one repo. `thh-fe-code` is nested under `thh-fe-audit/` and 
 ```bash
 git clone https://github.com/ISHANKSHARMA146/thh-frontend-clean.git /tmp/tfc
 cp -R /tmp/tfc/thh-fe-audit ~/.claude/skills/thh-fe-audit
-ln -sfn ~/.claude/skills/thh-fe-audit/thh-fe-code ~/.claude/skills/thh-fe-code
+ln -sfn ~/.claude/skills/thh-fe-audit/thh-fe-code   ~/.claude/skills/thh-fe-code
+ln -sfn ~/.claude/skills/thh-fe-audit/thh-fe-antiai ~/.claude/skills/thh-fe-antiai
 rm -rf /tmp/tfc
 ```
 
@@ -45,11 +50,12 @@ rm -rf /tmp/tfc
 ```bash
 git clone https://github.com/ISHANKSHARMA146/thh-frontend-clean.git /tmp/tfc
 cp -R /tmp/tfc/thh-fe-audit .claude/skills/thh-fe-audit
-ln -sfn "$PWD/.claude/skills/thh-fe-audit/thh-fe-code" .claude/skills/thh-fe-code
+ln -sfn "$PWD/.claude/skills/thh-fe-audit/thh-fe-code"   .claude/skills/thh-fe-code
+ln -sfn "$PWD/.claude/skills/thh-fe-audit/thh-fe-antiai" .claude/skills/thh-fe-antiai
 rm -rf /tmp/tfc
 ```
 
-Reload skills (`/reload-plugins` in Claude Code) — `/thh-fe-audit` and `/thh-fe-code` both appear.
+Reload skills (`/reload-plugins` in Claude Code) — `/thh-fe-audit`, `/thh-fe-code`, and `/thh-fe-antiai` all appear.
 
 ## Typical loop
 

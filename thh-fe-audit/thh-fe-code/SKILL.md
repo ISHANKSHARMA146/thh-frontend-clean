@@ -43,6 +43,7 @@ Then read the relevant file(s) for the area you're touching:
 | Structure, composition, god-file splitting | `references/components-structure.md` |
 | Bundle size, lazy loading, tables, perceived speed | `references/performance.md` |
 | next-auth, Sanity, Table/Virtual, socket, dnd, recharts, posthog, dup libs | `references/integrations.md` |
+| AI slop, design tokens, reinvented primitives, following our patterns | `references/anti-ai-slop.md` |
 | ESLint, Prettier, TS, env, pre-commit | `references/tooling.md` |
 
 If you can't locate `references/`, you still apply the **Golden rules** and **version cheat sheet** from memory (below) — but read the reference when one exists for the area.
@@ -74,6 +75,7 @@ If you can't locate `references/`, you still apply the **Golden rules** and **ve
 6. **No god-files.** Component >~300 lines, service >~400, store >~300, hook >~150 → split as you go.
 7. **Services are transport-only.** Build URL → `authenticatedFetch` → parse → typed return. Business logic lives in hooks/utils, not services. (`references/data-layer.md`.)
 8. **Let the compiler work.** React Compiler on → no manual `useMemo`/`useCallback`/`memo`. Type everything; no `any`. Named exports (except Next defaults).
+9. **Follow the breadcrumbs — no AI slop.** Match the nearest existing example, use THH design tokens (`text-ink`/`bg-paper`/`border-rule`/`text-brand`, Fraunces serif) not hardcoded values, reuse `components/ui/` primitives (don't reinvent a select/modal/table/spinner), no defensive try-catch around trusted/typed inputs, no redundant comments, handle loading/empty/error + a11y. (`references/anti-ai-slop.md`.)
 
 ## Version cheat sheet (the traps)
 
