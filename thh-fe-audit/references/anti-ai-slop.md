@@ -132,6 +132,28 @@ LLMs converge on a median aesthetic. None of it is THH (we're editorial/paper/se
 - Emoji as UI icons (use `lucide-react`).
 Match the existing pages' restraint: paper background, ink text, serif headings, hairline `--color-rule` borders, brand-blue accents used sparingly.
 
+### 3.1 Concrete design tells — exact values to ban → the THH fix
+
+These are the specific values AI emits by default. Each is a finding; each maps to a THH `@theme` token.
+
+**The signature combo (the #1 tell).** `rounded-2xl shadow-lg p-6` stamped on every box. And **a thick colored border on one side of a rounded card** is the single most recognizable AI-generated tell. → Use the radius scale (`rounded-md`/`rounded-lg` from `--radius` 0.625rem) + the single `--shadow-receipt` shadow; borders are hairline `border-rule`, all sides, never a fat one-sided accent stripe.
+
+**Radius.** No `rounded-2xl`/`rounded-3xl`/`rounded-full` pills on cards/containers. Buttons & inputs small radius, cards medium, panels square. Use `rounded-sm`/`rounded-md`/`rounded-lg` (the `--radius-*` scale) — pick by element, don't max it out everywhere.
+
+**Shadows.** One light shadow only (`--shadow-receipt`). No multi-layer drop shadows, no soft shadow on *every* container, no neon/colored glows. Most surfaces sit on a hairline `border-rule`, not a shadow.
+
+**Color.** No pure `#000`/`#fff` (use `--color-ink` / `--color-paper`). No low-contrast gray-on-gray body text. No `purple`/`violet`/`indigo`/cyan-on-dark gradients. Neutrals are already tinted toward the brand in the tokens — use them, don't introduce a parallel gray ramp.
+
+**Spacing rhythm.** Tailwind's 4px base is fine; stay on the scale (`1/2/3/4/6/8/12/16` → 4/8/12/16/24/32/48/64px). Don't invent `p-[7px]`/`gap-[13px]` one-offs. No excessive card nesting, no empty/orphan grid cells.
+
+**Typography.** Display = Fraunces serif (`--font-display`); never override to Inter/Roboto/Arial inline. Body lines ~1.5 line-height, paragraph measure 65–75ch (`max-w-prose`-ish), and **tabular numbers** (`tabular-nums`) for prices, dates, counts, metrics so columns align. No em-dashes in UI microcopy — use commas/colons/parentheses.
+
+**Motion (the biggest perf+feel tell).** Animate **only `transform` and `opacity`** — never `width`/`height`/`margin`/`top`/`left` (they thrash layout). No `transition: all`. Durations **120–250ms** (under 300ms; interactions that should feel instant get no transition). Entrance easing is not `ease-in`. Active feedback = `scale(0.98)` or `translateY(1px)`. Always respect `prefers-reduced-motion`. We use `motion/react` (not `framer-motion`) and `tw-animate-css`.
+
+**Layout.** Break the symmetric centered-badge + 3-equal-card formula. Don't wrap everything in a card. No fake dashboard mockups, floating icon-pill rows, or decorative `BETA`/meaningless badges. Prefer intentional grids with a dominant cell over three identical columns.
+
+**Contrast / a11y.** WCAG AA: 4.5:1 body text, 3:1 large headings — the `ink`/`paper` tokens already satisfy this; hand-picked grays usually don't.
+
 ---
 
 ## 4. Before-you-write breadcrumb checklist (run every time)
@@ -159,5 +181,11 @@ Grep/scan signals that something is slop:
 - Comments restating the function name; multi-line "what it does" doc blocks on trivial fns → comment noise (S4).
 - `forwardRef`, hand-written `useMemo`/`useCallback`/`memo` → React-19/compiler slop (S8).
 - Components with a `useQuery`/list but no skeleton/empty/error branch → missing states (S9).
+- `rounded-2xl`, `rounded-3xl`, `rounded-full` on cards/containers; `shadow-lg`/`shadow-xl`/`shadow-2xl`; `backdrop-blur` → generic radius/shadow/glass (§3.1).
+- `transition-all`, `transition: all`, or animating `width`/`height`/`margin`/`top`/`left`; durations ≥300ms → motion slop (§3.1).
+- `#000`/`#fff`/`#ffffff`/`black`/`white` literal colors; `gradient-to-` with `purple`/`violet`/`indigo`/`cyan` → palette slop (§3.1).
+- `p-[`, `gap-[`, `m-[` arbitrary pixel one-offs → off-scale spacing (§3.1).
+- ` — ` (em dash) in JSX text/microcopy → AI copy tell (§3.1).
+- price/date/count rendered without `tabular-nums` in tables → misaligned numerics (§3.1).
 
 Report these like any other finding, tier them, and cite the rule ID (S1–S10 / §-number).
